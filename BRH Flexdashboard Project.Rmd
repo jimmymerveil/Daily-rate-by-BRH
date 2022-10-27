@@ -1,0 +1,103 @@
+---
+title: "Publication quotidienne des données sur le taux de change HTG/USD par la BRH"
+author: "Ymca DOLBRUN et Jimmy MERVEIL"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    Source_code: embed
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+
+library(flexdashboard) 
+library(shiny) 
+library(dplyr) 
+library(plotly)
+library(xts)
+library(tmap)
+library(dygraphs)
+library(DT)
+library(tidyverse)
+```
+
+```{r global}
+
+##################################
+##### Importation des données#######
+######################################
+
+
+datajour<- read.csv("taux du jour.csv") #Source: BRH-https://www.brh.ht/taux-du-jour/
+
+databanque<-read.csv("Taux par Banque.csv") #Source: Banque République d'Haiti-https://www.brh.ht/taux-affiches-par-les-banques-et-les-agents-de-change-2/
+
+######## Creation de variables ######
+
+Categorical.Variables = c("MARCHE INFORMEL", "TAUX DE REFERENCE", "UNIBANK", "SOGEBANK","BUH","BPH","CITIBANK","SOGEBEL","CAPITAL BANK","BNC","TAUX MAXIMUM","TAUX MINIMUM","TAUX DE REFERENCE BRH (Achat)")
+
+Numeric.Variables = c("Achats", "Ventes", "Spread")
+
+```
+
+
+
+Rows {.sidebar data-width=350}
+-----------------------------------------------------------------------
+
+```{r}
+
+#######Cette section sera utilisée pour faire la comparaison entre la section variable et celle qui est numérique ##################################
+
+selectInput("datajour", label= "Secteurs", 
+            choices= c("MARCHE INFORMEL", "TAUX DE REFERENCE", "UNIBANK", "SOGEBANK","BUH","BPH","CITIBANK","SOGEBEL","CAPITAL BANK","BNC","TAUX MAXIMUM","TAUX MINIMUM","TAUX DE REFERENCE BRH (Achat)
+"), selected= "MARCHE INFORMEL")
+
+
+selectInput("Variables", label= "Taux",
+            choices= c("Achats", "ventes", "Spread"), selected= "Achats")
+
+```
+
+
+Rows {data-width=400}
+-----------------------------------------------------------------------
+
+### Taux par Banque
+
+```{r}
+
+ ###### En utilisant cette bibliothèque, nous allons pourvoir spécifier la valeur de chaque Banque dans le secteur ########
+
+
+library(billboarder)
+
+billboarder()%>% bb_histogram(databanque$ACHATS,databanque$VENTES,databanque$SPREAD, fill = "green")
+
+```
+
+
+Rows {data-width=650}
+----------------------------------------------------------------------
+
+### Taux de Référence
+
+```{r}
+
+
+TAUX_REFERENCE<- table(datajour$ACHATS)
+
+billboarder() %>% bb_piechart(TAUX_REFERENCE)
+
+```
+
+
+### Taux du secteur informel
+
+```{r}
+billboarder() %>% 
+  bb_barchart (data = table(datajour$ACHATS))
+
+```
+
